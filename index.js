@@ -34,15 +34,47 @@ async function run() {
 
     // GET All Tutors
     app.get("/tutors", async (req, res) => {
-      const result = await tutorsCollections.find({}).toArray();
-      res.status(200).json({
-        success: true,
-        message: "Tutors retrieve successfully",
-        data: result,
-      });
+      try {
+        const result = await tutorsCollections.find({}).toArray();
+        res.status(200).json({
+          success: true,
+          message: "Tutors retrieve successfully",
+          data: result,
+        });
+      } catch (error) {
+        console.error(error);
+
+        res.status(500).json({
+          success: false,
+          message: "Failed to retrieve tutors",
+          error: error.message,
+        });
+      }
     });
 
-    // Send a ping to confirm a successful connection
+    // POST Create A Tutor
+    app.post("/tutors", async (req, res) => {
+      try {
+        const tutor = req.body;
+        const result = await tutorsCollections.insertOne(tutor);
+        res.status(201).json({
+          success: true,
+          message: "Tutor added successfully",
+          data: {
+            insertedId: result.insertedId,
+          },
+        });
+      } catch (error) {
+        console.error(error);
+
+        res.status(500).json({
+          success: false,
+          message: "Failed to add tutor",
+          error: error.message,
+        });
+      }
+    });
+
     await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!",
@@ -53,13 +85,6 @@ async function run() {
   }
 }
 run().catch(console.dir);
-
-// app.get("/", (req, res) => {
-//   res.status(200).json({
-//     success: true,
-//     message: "Welcome to MediQueue API Server",
-//   });
-// });
 
 app.get("/", (req, res) => {
   res.send(`
