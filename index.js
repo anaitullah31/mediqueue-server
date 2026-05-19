@@ -35,8 +35,6 @@ async function run() {
     // GET All Tutors
     app.get("/tutors", async (req, res) => {
       const result = await tutorsCollections.find({}).toArray();
-      //   console.log(result);
-
       res.status(200).json({
         success: true,
         message: "Tutors retrieve successfully",
@@ -46,9 +44,9 @@ async function run() {
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
-    // console.log(
-    //   "Pinged your deployment. You successfully connected to MongoDB!",
-    // );
+    console.log(
+      "Pinged your deployment. You successfully connected to MongoDB!",
+    );
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
@@ -64,7 +62,29 @@ run().catch(console.dir);
 // });
 
 app.get("/", (req, res) => {
-  res.send(`Server is running`);
+  res.send(`
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>MediQueue - Online Learning & Tutoring Platform API</title>
+
+        <link rel="icon" type="image/png" href="/favicon.ico" />
+
+        <meta charset="UTF-8" />
+        <meta
+          name="description"
+          content="MediQueue - Online Learning & Tutoring Platform"
+        />
+      </head>
+
+      <body style="font-family:sans-serif;padding:10px; text-align:center">
+        <h1>Welcome to MediQueue Server</h1>
+        <p>
+          Online Learning & Tutoring Platform API is running successfully.
+        </p>
+      </body>
+    </html>
+  `);
 });
 
 app.listen(port, () => {
