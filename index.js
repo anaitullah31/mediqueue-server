@@ -1,7 +1,7 @@
 const express = require("express");
 const dotenv = require("dotenv");
 const cors = require("cors");
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 
 dotenv.config();
 
@@ -47,6 +47,27 @@ async function run() {
         res.status(500).json({
           success: false,
           message: "Failed to retrieve tutors",
+          error: error.message,
+        });
+      }
+    });
+
+    // GET Single Tutor
+    app.get("/tutors/:id", async (req, res) => {
+      try {
+        const { id } = req.params;
+        const result = await tutorsCollections.findOne({ _id: new ObjectId(id) });
+        res.status(200).json({
+          success: true,
+          message: "Tutor details retrieve successfully",
+          data: result,
+        });
+      } catch (error) {
+        console.error(error);
+
+        res.status(500).json({
+          success: false,
+          message: "Failed to retrieve tutor details",
           error: error.message,
         });
       }
