@@ -29,6 +29,19 @@ async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
+
+    const tutorsCollections = client.db("mediqueue").collection("tutors");
+
+    // GET All Tutors
+    app.get("/tutors", async (req, res) => {
+      const result = await tutorsCollections.find({}).toArray();
+      res.status(200).json({
+        success: true,
+        message: "Tutors retrieve successfully",
+        data: result,
+      });
+    });
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
@@ -55,7 +68,7 @@ app.get("/", (req, res) => {
       <head>
         <title>MediQueue - Online Learning & Tutoring Platform API</title>
 
-        <link rel="icon" type="image/png" href="/favicon.png" />
+        <link rel="icon" type="image/png" href="/favicon.ico" />
 
         <meta charset="UTF-8" />
         <meta
