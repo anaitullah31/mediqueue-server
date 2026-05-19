@@ -12,7 +12,7 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 // Serve public folder
-app.use(express.static("public"));
+// app.use(express.static("public"));
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.rsynxg9.mongodb.net/?appName=Cluster0`;
 
@@ -25,76 +25,76 @@ const client = new MongoClient(uri, {
   },
 });
 
+const tutorsCollections = client.db("mediqueue").collection("tutors");
+
+// GET All Tutors
+app.get("/tutors", async (req, res) => {
+  try {
+    const result = await tutorsCollections.find({}).toArray();
+    res.status(200).json({
+      success: true,
+      message: "Tutors retrieve successfully",
+      data: result,
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to retrieve tutors",
+      error: error.message,
+    });
+  }
+});
+
+// GET Single Tutor
+app.get("/tutors/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await tutorsCollections.findOne({ _id: new ObjectId(id) });
+    res.status(200).json({
+      success: true,
+      message: "Tutor details retrieve successfully",
+      data: result,
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to retrieve tutor details",
+      error: error.message,
+    });
+  }
+});
+
+// POST Create A Tutor
+app.post("/add-tutors", async (req, res) => {
+  try {
+    const tutor = req.body;
+    const result = await tutorsCollections.insertOne(tutor);
+    res.status(201).json({
+      success: true,
+      message: "Tutor added successfully",
+      data: {
+        insertedId: result.insertedId,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to add tutor",
+      error: error.message,
+    });
+  }
+});
+
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
-
-    const tutorsCollections = client.db("mediqueue").collection("tutors");
-
-    // GET All Tutors
-    app.get("/tutors", async (req, res) => {
-      try {
-        const result = await tutorsCollections.find({}).toArray();
-        res.status(200).json({
-          success: true,
-          message: "Tutors retrieve successfully",
-          data: result,
-        });
-      } catch (error) {
-        console.error(error);
-
-        res.status(500).json({
-          success: false,
-          message: "Failed to retrieve tutors",
-          error: error.message,
-        });
-      }
-    });
-
-    // GET Single Tutor
-    app.get("/tutors/:id", async (req, res) => {
-      try {
-        const { id } = req.params;
-        const result = await tutorsCollections.findOne({ _id: new ObjectId(id) });
-        res.status(200).json({
-          success: true,
-          message: "Tutor details retrieve successfully",
-          data: result,
-        });
-      } catch (error) {
-        console.error(error);
-
-        res.status(500).json({
-          success: false,
-          message: "Failed to retrieve tutor details",
-          error: error.message,
-        });
-      }
-    });
-
-    // POST Create A Tutor
-    app.post("/add-tutors", async (req, res) => {
-      try {
-        const tutor = req.body;
-        const result = await tutorsCollections.insertOne(tutor);
-        res.status(201).json({
-          success: true,
-          message: "Tutor added successfully",
-          data: {
-            insertedId: result.insertedId,
-          },
-        });
-      } catch (error) {
-        console.error(error);
-
-        res.status(500).json({
-          success: false,
-          message: "Failed to add tutor",
-          error: error.message,
-        });
-      }
-    });
 
     await client.db("admin").command({ ping: 1 });
     console.log(
@@ -108,29 +108,22 @@ async function run() {
 run().catch(console.dir);
 
 app.get("/", (req, res) => {
-  res.send(`
-    <!DOCTYPE html>
-    <html>
-      <head>
-        <title>MediQueue - Online Learning & Tutoring Platform API</title>
+  try {
+    res.status(200).json({
+      success: true,
+      message:
+        "MediQueue - Online Learning & Tutoring Platform API is running successfully",
+      data: null,
+    });
+  } catch (error) {
+    console.error(error);
 
-        <link rel="icon" type="image/png" href="/favicon.ico" />
-
-        <meta charset="UTF-8" />
-        <meta
-          name="description"
-          content="MediQueue - Online Learning & Tutoring Platform"
-        />
-      </head>
-
-      <body style="font-family:sans-serif;padding:10px; text-align:center">
-        <h1>Welcome to MediQueue Server</h1>
-        <p>
-          Online Learning & Tutoring Platform API is running successfully.
-        </p>
-      </body>
-    </html>
-  `);
+    res.status(500).json({
+      success: false,
+      message: "Failed to run the API",
+      error: error.message,
+    });
+  }
 });
 
 app.listen(port, () => {
