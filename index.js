@@ -47,6 +47,28 @@ app.get("/tutors", async (req, res) => {
   }
 });
 
+app.get("/my-tutors/:userId", async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const result = await tutorsCollections.find({ userId }).toArray();
+    // console.log(result, "RESULT");
+
+    res.status(200).json({
+      success: true,
+      message: "My tutors retrieve successfully",
+      data: result,
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to retrieve my tutors",
+      error: error.message,
+    });
+  }
+});
+
 // GET Single Tutor
 app.get("/tutors/:id", async (req, res) => {
   try {
