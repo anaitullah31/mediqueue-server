@@ -53,7 +53,7 @@ async function run() {
     });
 
     // POST Create A Tutor
-    app.post("/tutors", async (req, res) => {
+    app.post("/add-tutors", async (req, res) => {
       try {
         const tutor = req.body;
         const result = await tutorsCollections.insertOne(tutor);
