@@ -47,6 +47,7 @@ app.get("/tutors", async (req, res) => {
   }
 });
 
+// GET My All Tutors
 app.get("/my-tutors/:userId", async (req, res) => {
   try {
     const { userId } = req.params;
@@ -64,6 +65,40 @@ app.get("/my-tutors/:userId", async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Failed to retrieve my tutors",
+      error: error.message,
+    });
+  }
+});
+
+// PATCH My Tutor
+
+// DELETE My Tutor
+app.delete("/my-tutors/:id", async (req, res) => {
+  try {
+    const { id } = await req.params;
+
+    const result = await tutorsCollections.deleteOne({
+      _id: new ObjectId(id),
+    });
+    // Not found
+    if (result.deletedCount === 0) {
+      return res.status(404).send({
+        success: false,
+        message: "Tutor not found",
+      });
+    }
+    // Success
+    res.status(200).send({
+      success: true,
+      message: "Tutor deleted successfully",
+      data: result,
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).send({
+      success: false,
+      message: "Failed to delete tutor",
       error: error.message,
     });
   }
