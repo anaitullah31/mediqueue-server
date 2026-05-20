@@ -213,6 +213,7 @@ app.get("/my-booked-session/:userId", async (req, res) => {
   }
 });
 
+// POST Booked New Session
 app.post("/session-bookings", async (req, res) => {
   try {
     const bookingData = req.body;
@@ -290,6 +291,68 @@ app.post("/session-bookings", async (req, res) => {
   }
 });
 
+// UPDATE | CANCEL SESSION
+app.patch("/my-booked-session/:sessionId", async (req, res) => {
+  try {
+    const { sessionId } = req.params;
+
+    if (!ObjectId.isValid(sessionId)) {
+      return res.status(400).send({
+        success: false,
+        message: "Invalid session id",
+      });
+    }
+
+    const bookedSession = await bookedSessionCollections.findOne({
+      _id: new ObjectId(sessionId),
+    });
+
+    if (!bookedSession) {
+      return res.status(404).send({
+        success: false,
+        message: "Booked session not found",
+      });
+    }
+
+    if (bookedSession.status === "cancel") {
+      return res.status(400).send({
+        success: false,
+        message: "Session is already cancelled",
+      });
+    }
+
+    const result = await bookedSessionCollections.updateOne(
+      { _id: new ObjectId(sessionId) },
+      {
+        $set: {
+          status: "cancel",
+          cancelledAt: new Date().toLocaleDateString(),
+        },
+      }
+    );
+
+    if (ObjectId.isValid(bookedSession.courseId)) {
+      await tutorsCollections.updateOne(
+        { _id: new ObjectId(bookedSession.courseId) },
+        { $inc: { totalSlot: 1 } }
+      );
+    }
+
+    res.status(200).send({
+      success: true,
+      message: "Session cancelled successfully",
+      data: result,
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).send({
+      success: false,
+      message: "Failed to cancel session",
+      error: error.message,
+    });
+  }
+});
 // Removed explicit run() to let the MongoDB driver automatically handle connection on first operation
 // async function run() {
 //   try {
