@@ -26,6 +26,9 @@ const client = new MongoClient(uri, {
 });
 
 const tutorsCollections = client.db("mediqueue").collection("tutors");
+const bookedSessionCollections = client
+  .db("mediqueue")
+  .collection("bookedsession");
 
 // GET All Tutors
 app.get("/tutors", async (req, res) => {
@@ -173,6 +176,83 @@ app.post("/add-tutors", async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Failed to add tutor",
+      error: error.message,
+    });
+  }
+});
+
+app.post("/session-bookings", async (req, res) => {
+  try {
+    const bookingData = req.body;
+    const { courseId, studentId } = bookingData;
+
+    if (!courseId || !studentId) {
+      return res.status(400).send({
+        success: false,
+        message: "Course id and student id are required",
+      });
+    }
+
+    if (!ObjectId.isValid(courseId)) {
+      return res.status(400).send({
+        success: false,
+        message: "Invalid course id",
+      });
+    }
+
+    const tutor = await tutorsCollections.findOne({
+      _id: new ObjectId(courseId),
+    });
+
+    if (!tutor) {
+      return res.status(404).send({
+        success: false,
+        message: "Course not found",
+      });
+    }
+
+    const alreadyBooked = await bookedSessionCollections.findOne({
+      courseId,
+      studentId,
+    });
+
+    if (alreadyBooked) {
+      return res.status(409).send({
+        success: false,
+        message: "You already booked this course",
+      });
+    }
+
+    if (Number(tutor.totalSlot) <= 0) {
+      return res.status(400).send({
+        success: false,
+        message: "No slots available",
+      });
+    }
+
+    const booking = {
+      ...bookingData,
+      status: "pending",
+      paymentStatus: "unpaid",
+      bookedAt: new Date().toLocaleDateString(),
+    };
+
+    const result = await bookedSessionCollections.insertOne(booking);
+
+    await tutorsCollections.updateOne(
+      { _id: new ObjectId(courseId) },
+      { $inc: { totalSlot: -1 } },
+    );
+
+    res.status(201).send({
+      success: true,
+      message: "Class booked successfully",
+      data: result,
+    });
+  } catch (error) {
+    res.status(500).send({
+      success: false,
+      message: "Failed to book class",
       error: error.message,
     });
   }
