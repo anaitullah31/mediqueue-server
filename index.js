@@ -73,7 +73,7 @@ app.get("/tutors", async (req, res) => {
 });
 
 // GET My All Tutors
-app.get("/my-tutors/:userId", async (req, res) => {
+app.get("/my-tutors/:userId", verifyToken, async (req, res) => {
   try {
     const { userId } = req.params;
     const result = await tutorsCollections.find({ userId }).toArray();
@@ -128,7 +128,7 @@ app.delete("/my-tutors/:id", async (req, res) => {
 });
 
 // GET Single Tutor
-app.get("/tutors/:id", async (req, res) => {
+app.get("/tutors/:id", verifyToken, async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -207,7 +207,7 @@ app.post("/add-tutors", async (req, res) => {
 });
 
 // GET My Booked Session
-app.get("/my-booked-session/:userId", async (req, res) => {
+app.get("/my-booked-session/:userId", verifyToken, async (req, res) => {
   try {
     const { userId } = req.params;
 
