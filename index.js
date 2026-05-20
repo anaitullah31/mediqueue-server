@@ -181,6 +181,38 @@ app.post("/add-tutors", async (req, res) => {
   }
 });
 
+// GET My Booked Session
+app.get("/my-booked-session/:userId", async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    if (!userId) {
+      return res.status(400).send({
+        success: false,
+        message: "User id is required",
+      });
+    }
+
+    const result = await bookedSessionCollections
+      .find({ studentId: userId })
+      .toArray();
+
+    res.status(200).send({
+      success: true,
+      message: "Booked sessions fetched successfully",
+      data: result,
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).send({
+      success: false,
+      message: "Failed to fetch booked sessions",
+      error: error.message,
+    });
+  }
+});
+
 app.post("/session-bookings", async (req, res) => {
   try {
     const bookingData = req.body;
