@@ -70,8 +70,6 @@ app.get("/my-tutors/:userId", async (req, res) => {
   }
 });
 
-// PATCH My Tutor
-
 // DELETE My Tutor
 app.delete("/my-tutors/:id", async (req, res) => {
   try {
@@ -120,6 +118,38 @@ app.get("/tutors/:id", async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Failed to retrieve tutor details",
+      error: error.message,
+    });
+  }
+});
+
+// PATCH Single Tutor
+app.patch("/tutors/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updatedTutor = req.body;
+    const result = await tutorsCollections.updateOne(
+      { _id: new ObjectId(id) },
+      {
+        $set: updatedTutor,
+      },
+    );
+    if (result.matchedCount === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Tutor not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Tutor updated successfully",
+      modifiedCount: result.modifiedCount,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to update tutor",
       error: error.message,
     });
   }
