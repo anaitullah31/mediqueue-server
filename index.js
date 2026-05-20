@@ -162,6 +162,8 @@ app.patch("/tutors/:id", async (req, res) => {
 app.post("/add-tutors", async (req, res) => {
   try {
     const tutor = req.body;
+    console.log(tutor);
+
     const result = await tutorsCollections.insertOne(tutor);
     res.status(201).json({
       success: true,
@@ -328,13 +330,13 @@ app.patch("/my-booked-session/:sessionId", async (req, res) => {
           status: "cancel",
           cancelledAt: new Date().toLocaleDateString(),
         },
-      }
+      },
     );
 
     if (ObjectId.isValid(bookedSession.courseId)) {
       await tutorsCollections.updateOne(
         { _id: new ObjectId(bookedSession.courseId) },
-        { $inc: { totalSlot: 1 } }
+        { $inc: { totalSlot: 1 } },
       );
     }
 
