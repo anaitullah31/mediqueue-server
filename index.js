@@ -55,7 +55,17 @@ const bookedSessionCollections = client
 // GET All Tutors
 app.get("/tutors", async (req, res) => {
   try {
-    const result = await tutorsCollections.find({}).toArray();
+    const limit = parseInt(req.query.limit);
+
+    const query = {};
+
+    let cursor = tutorsCollections.find(query);
+
+    if (limit) {
+      cursor = cursor.limit(limit);
+    }
+    const result = await cursor.toArray();
+
     res.status(200).json({
       success: true,
       message: "Tutors retrieve successfully",
