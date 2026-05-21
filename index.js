@@ -33,17 +33,26 @@ const JWKS = createRemoteJWKSet(
 const verifyToken = async (req, res, next) => {
   const authHeader = req?.headers?.authorization;
   if (!authHeader) {
-    return res.status(401).json({ message: "Unauthorized" });
+    return res
+      .status(401)
+      .json({ message: "Unauthorized access. Please log in to continue." });
   }
   const token = authHeader.split(" ")[1];
   if (!token) {
-    return res.status(401).json({ message: "Unauthorized" });
+    return res
+      .status(401)
+      .json({ message: "Unauthorized access. Please log in to continue." });
   }
   try {
     const { payload } = await jwtVerify(token, JWKS);
     next();
   } catch (error) {
-    return res.status(403).json({ message: "Forbidden" });
+    return res
+      .status(403)
+      .json({
+        message:
+          "Forbidden access. You do not have permission to perform this action.",
+      });
   }
 };
 
@@ -106,7 +115,7 @@ app.get("/my-tutors/:userId", verifyToken, async (req, res) => {
 });
 
 // DELETE My Tutor
-app.delete("/my-tutors/:id", async (req, res) => {
+app.delete("/my-tutors/:id", verifyToken, async (req, res) => {
   try {
     const { id } = await req.params;
 
@@ -160,7 +169,7 @@ app.get("/tutors/:id", verifyToken, async (req, res) => {
 });
 
 // PATCH Single Tutor
-app.patch("/tutors/:id", async (req, res) => {
+app.patch("/tutors/:id", verifyToken, async (req, res) => {
   try {
     const { id } = req.params;
     const updatedTutor = req.body;
@@ -192,7 +201,7 @@ app.patch("/tutors/:id", async (req, res) => {
 });
 
 // POST Create A Tutor
-app.post("/add-tutors", async (req, res) => {
+app.post("/add-tutors", verifyToken, async (req, res) => {
   try {
     const tutor = req.body;
     console.log(tutor);
@@ -249,7 +258,7 @@ app.get("/my-booked-session/:userId", verifyToken, async (req, res) => {
 });
 
 // POST Booked New Session
-app.post("/session-bookings", async (req, res) => {
+app.post("/session-bookings", verifyToken, async (req, res) => {
   try {
     const bookingData = req.body;
     const { courseId, studentId } = bookingData;
@@ -327,7 +336,7 @@ app.post("/session-bookings", async (req, res) => {
 });
 
 // UPDATE | CANCEL SESSION
-app.patch("/my-booked-session/:sessionId", async (req, res) => {
+app.patch("/my-booked-session/:sessionId", verifyToken, async (req, res) => {
   try {
     const { sessionId } = req.params;
 
