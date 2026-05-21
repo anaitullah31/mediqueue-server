@@ -4,11 +4,7 @@ MediQueue Server is the backend API for the MediQueue tutor booking web applicat
 
 ---
 
-## Live API URL
-
-```txt
-https://mediqueue-server-one.vercel.app
-```
+## Live API URL - https://mediqueue-server-one.vercel.app
 
 ---
 
